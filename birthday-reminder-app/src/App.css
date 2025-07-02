@@ -1,0 +1,183 @@
+.app {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 2rem;
+  background-color: #fefefe;
+}
+
+.header {
+  font-size: 2.5rem;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+.container {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #ccc;
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* forms */
+.birthday-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+  align-items: stretch;
+}
+
+.birthday-form input,
+.birthday-form textarea {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.birthday-form button {
+  padding: 0.6rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: flex-end; /* Left align the button */
+  min-width: 100px;
+}
+
+.birthday-form button:hover {
+  background-color: #0056b3;
+}
+
+/* tables */
+.birthday-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.birthday-table table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+}
+
+.birthday-table th, .birthday-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  word-break: break-word;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.sent {
+  background-color: #c0f4d8;
+  color: green;
+}
+
+.not-sent {
+  background-color: #fddede;
+  color: red;
+}
+
+/* Top bar styles */
+.top-bar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  max-width: 700px;
+  margin: 0 auto 1rem auto;
+  width: 100%;
+}
+
+.show-add-btn {
+  align-self: flex-start;
+  padding: 0.6rem 1.2rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.show-add-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive styles */
+@media (max-width: 800px) {
+  .container {
+    padding: 1rem;
+    max-width: 98vw;
+  }
+  .header {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0.5rem;
+    border-radius: 6px;
+  }
+  .birthday-form {
+    gap: 0.5rem;
+  }
+  .birthday-table table,
+  .birthday-table th,
+  .birthday-table td {
+    font-size: 0.95rem;
+    padding: 0.5rem;
+  }
+  .header {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.2rem;
+  }
+  .birthday-table table {
+    min-width: 350px;
+    font-size: 0.85rem;
+  }
+  .birthday-form button {
+    min-width: 80px;
+    font-size: 0.95rem;
+  }
+}
+
+
+.search-box {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  flex-grow: 1;
+  margin-right: auto;
+  max-width: 300px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 700px;
+  margin: 0 auto 1rem auto;
+  width: 100%;
+  gap: 1rem;
+}
