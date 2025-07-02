@@ -39,11 +39,11 @@ app.get('/api/birthdays', async (_, res, next) => {
 // POST new
 app.post('/api/birthdays', async (req, res, next) => {
   try {
-    const { name, date, message = null, status = 'Not Sent' } = req.body;
+    const { name, date, email, status = 'Not Sent' } = req.body;
     const { rows } = await pool.query(
-      `INSERT INTO birthdays (name, date, message, status)
+      `INSERT INTO birthdays (name, date, email, status)
        VALUES ($1, $2, $3, $4) RETURNING *`,
-      [name, date, message, status]
+      [name, date, email, status]
     );
     res.status(201).json(rows[0]);
   } catch (err) { next(err); }
@@ -53,12 +53,12 @@ app.post('/api/birthdays', async (req, res, next) => {
 app.put('/api/birthdays/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, date, message, status } = req.body;
+    const { name, date, email, status } = req.body;
     const { rows } = await pool.query(
       `UPDATE birthdays
-         SET name=$1, date=$2, message=$3, status=$4
+         SET name=$1, date=$2, email=$3, status=$4
        WHERE id=$5 RETURNING *`,
-      [name, date, message, status, id]
+      [name, date, email, status, id]
     );
     res.json(rows[0]);
   } catch (err) { next(err); }

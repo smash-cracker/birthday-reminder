@@ -7,7 +7,7 @@ function BirthdayTable({ birthdays, onDelete, onEdit }) {
       <table>
         <thead>
           <tr>
-            <th>Name</th><th>Date</th><th>Message</th><th>Status</th><th>Actions</th>
+            <th>Name</th><th>Date</th><th>Email</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -15,7 +15,7 @@ function BirthdayTable({ birthdays, onDelete, onEdit }) {
             <tr key={b.id}>
               <td>{b.name}</td>
               <td>{b.date}</td>
-              <td>{b.message}</td>
+              <td>{b.email}</td>
               <td>
                 <span className={`status ${b.status === 'Sent' ? 'sent' : 'not-sent'}`}>
                   {b.status}

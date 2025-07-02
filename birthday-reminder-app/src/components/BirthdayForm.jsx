@@ -4,7 +4,7 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
   const [form, setForm] = useState({
     name: '',
     date: '',
-    message: '',
+    email: '',
     status: 'Not Sent',
     ...(editingBirthday || {}),
   });
@@ -13,7 +13,7 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
     setForm({
       name: editingBirthday?.name || '',
       date: editingBirthday?.date || '',
-      message: editingBirthday?.message || '',
+      email: editingBirthday?.email || '',
       status: editingBirthday?.status || 'Not Sent',
       id: editingBirthday?.id,
     });
@@ -29,8 +29,8 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.name || !form.date) {
-      alert('Name and Date of Birth are required.');
+    if (!form.name || !form.date || !form.email) {
+      alert('Name, Date of Birth, and Email are required.');
       return;
     }
     if (editingBirthday) {
@@ -57,11 +57,13 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
         onChange={handleChange}
         required
       />
-      <textarea
-        name="message"
-        placeholder="Message (optional)"
-        value={form.message}
+      <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        value={form.email}
         onChange={handleChange}
+        required
       />
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         <button type="submit">
