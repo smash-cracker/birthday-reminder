@@ -78,12 +78,16 @@ export default function App() {
 
       <div className="container">
         {showForm && (
-          <BirthdayForm
-            onAdd={addBirthday}
-            onEdit={editBirthday}
-            editingBirthday={editing}
-            onClose={() => { setShowForm(false); setEditing(null); }}
-          />
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <BirthdayForm
+                onAdd={addBirthday}
+                onEdit={editBirthday}
+                editingBirthday={editing}
+                onClose={() => { setShowForm(false); setEditing(null); }}
+              />
+            </div>
+          </div>
         )}
 
         <BirthdayTable
