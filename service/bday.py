@@ -30,17 +30,19 @@ def send_birthday_email(to_email, to_name):
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 
-def send_birthday_email_to_HR(to_email, to_name, names_list):
+def send_birthday_email_to_HR(to_email, to_name, names_list, today):
     EMAIL_ADDRESS = 'asthetic0813@gmail.com'
     EMAIL_PASSWORD = 'xfhf kvfu zwjy najd'  # App password
 
+    day_label = "today" if today else "tomorrow"
+
     msg = EmailMessage()
-    msg['Subject'] = '🎂 Birthday Reminder for Tomorrow'
+    msg['Subject'] = f'🎂 Birthday Reminder for {day_label.capitalize()}'
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = to_email
     msg.set_content(
         f"Hello {to_name},\n\n"
-        f"The following employees have birthdays tomorrow:\n\n"
+        f"The following employees have birthdays {day_label}:\n\n"
         f"{names_list}\n\n"
         f"Please prepare wishes 🎉."
     )
@@ -62,6 +64,7 @@ def send_today_birthdays():
     print(f"day : {day}")
     print(f"month : {month}")
     print(f"🔍 Checking birthdays for today: {today.strftime('%Y-%m-%d')}")
+    birthday_names = []
 
     try:
         with psycopg2.connect(**DB_CONFIG) as conn:
@@ -70,7 +73,7 @@ def send_today_birthdays():
                     SELECT name, email FROM birthdays
                     WHERE EXTRACT(MONTH FROM date) = %s
                       AND EXTRACT(DAY FROM date) = %s;
-                """, (day, month))
+                """, (month, day))
                 results = cur.fetchall()
 
                 if results:
@@ -78,7 +81,16 @@ def send_today_birthdays():
                         send_birthday_email(email, name)
                 else:
                     print("No birthdays today.")
+                if results:
+                    for (name,_) in results:
+                        birthday_names.append(name)
 
+                    names_str = ", ".join(birthday_names)
+                    if names_str:
+                        # Send to both HRs
+                        send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str, True)
+                        send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str, True)
+            
     except Exception as e:
         print("Error while checking today's birthdays:", e)
 
@@ -110,8 +122,8 @@ def get_birthdays_tomorrow():
                     names_str = ", ".join(birthday_names)
                     if names_str:
                         # Send to both HRs
-                        send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str)
-                        send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str)
+                        send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str, False)
+                        send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str, False)
                 else:
                     print("No birthdays tomorrow.")
 
