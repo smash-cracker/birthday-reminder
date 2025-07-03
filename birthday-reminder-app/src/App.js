@@ -4,10 +4,10 @@ import BirthdayTable from './components/BirthdayTable';
 import './App.css';
 
 export default function App() {
-  const [birthdays, setBirthdays]     = useState([]);
-  const [showForm,  setShowForm]      = useState(false);
-  const [editing,   setEditing]       = useState(null);
-  const [search,    setSearch]        = useState('');
+  const [birthdays, setBirthdays] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [search, setSearch] = useState('');
 
   // Fetch once
   useEffect(() => {
@@ -63,20 +63,6 @@ export default function App() {
     <div className="app">
       <h1 className="header">🎉 Birthday Reminder</h1>
 
-      <div className="top-bar">
-        <input
-          className="search-input"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {!showForm && (
-          <button className="add-btn" onClick={() => { setEditing(null); setShowForm(true); }}>
-            Add
-          </button>
-        )}
-      </div>
-
       <div className="container">
         {showForm && (
           <div className="modal-overlay">
@@ -95,6 +81,11 @@ export default function App() {
           birthdays={list}
           onDelete={deleteBirthday}
           onEdit={(b) => { setEditing(b); setShowForm(true); }}
+          search={search}
+          setSearch={setSearch}
+          showForm={showForm}
+          setShowForm={setShowForm}
+          setEditing={setEditing}
         />
       </div>
     </div>

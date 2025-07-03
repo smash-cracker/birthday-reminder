@@ -12,29 +12,41 @@ function toDateDisplay(dateStr) {
 /* ---------- helper: days until next birthday -------- */
 function daysUntilNextBirthday(dateStr) {
   const today = new Date();
-  today.setHours(0, 0, 0, 0);                      // midnight
+  today.setHours(0, 0, 0, 0);
   const birthday = new Date(dateStr);
   birthday.setHours(0, 0, 0, 0);
-  birthday.setFullYear(today.getFullYear());       // start with this year
+  birthday.setFullYear(today.getFullYear());
 
   // if it already passed, roll forward to next year
   if (birthday < today) {
     birthday.setFullYear(today.getFullYear() + 1);
   }
 
-  const diffMs = birthday - today;                 // milliseconds
-  return Math.round(diffMs / 86_400_000);          // convert to days
+  const diffMs = birthday - today;
+  return Math.round(diffMs / 86_400_000);
 }
 
-function BirthdayTable({ birthdays, onDelete, onEdit }) {
-  /* -------- sort by “days until next birthday” ------ */
+function BirthdayTable({ birthdays, onDelete, onEdit, search, setSearch, showForm, setShowForm, setEditing }) {
   const sortedBirthdays = [...birthdays].sort(
     (a, b) => daysUntilNextBirthday(a.date) - daysUntilNextBirthday(b.date)
   );
 
   return (
     <div className="birthday-table">
-      <h2>Upcoming Birthdays</h2>
+      <div className="top-bar">
+        <h2>Upcoming Birthdays</h2>
+        <input
+          className="search-input"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        {!showForm && (
+          <button className="add-btn" onClick={() => { setEditing(null); setShowForm(true); }}>
+            Add
+          </button>
+        )}
+      </div>
       <table>
         <thead>
           <tr>
