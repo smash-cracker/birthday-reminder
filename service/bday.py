@@ -38,7 +38,12 @@ def send_birthday_email_to_HR(to_email, to_name, names_list):
     msg['Subject'] = '🎂 Birthday Reminder for Tomorrow'
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = to_email
-    msg.set_content(f"Hello {to_name},\n\nThe following employees have birthdays tomorrow:\n\n{names_list}\n\nPlease prepare wishes 🎉.")
+    msg.set_content(
+        f"Hello {to_name},\n\n"
+        f"The following employees have birthdays tomorrow:\n\n"
+        f"{names_list}\n\n"
+        f"Please prepare wishes 🎉."
+    )
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -77,14 +82,21 @@ def get_birthdays_tomorrow():
                         email = row[3]
                         send_birthday_email(email, name)
                         birthday_names.append(name)
-                        print(f"ID: {row[0]}, Name: {name}, Date: {row[2]}, Email: {email}, Status: {row[4]}")
+                        print(
+                            f"ID: {row[0]}, Name: {name}, Date: {row[2]}, "
+                            f"Email: {email}, Status: {row[4]}"
+                        )
 
-                    # ✅ Send combined birthday list to HR
-                    hr_email = "karthikreddie08@gmail.com"  # 🔁 Change to actual HR email
-                    hr_name = "Karthik Reddie"  # 🔁 Change to actual HR name
+                    # ✅ Send combined birthday list to both HR recipients
+                    hr_email_1 = "karthikreddie08@gmail.com"   # 🔁 Replace with actual HR email 1
+                    hr_name_1  = "Karthik Reddie"              # 🔁 Replace with actual HR name 1
+                    hr_email_2 = "@gmail.com"        # 🔁 Replace with actual HR email 2
+                    hr_name_2  = ""              # 🔁 Replace with actual HR name 2
+
                     names_str = ", ".join(birthday_names)
                     if names_str:
-                        send_birthday_email_to_HR(hr_email, hr_name, names_str)
+                        send_birthday_email_to_HR(hr_email_1, hr_name_1, names_str)
+                        send_birthday_email_to_HR(hr_email_2, hr_name_2, names_str)
 
                 else:
                     print(f"No birthdays found for {tomorrow.strftime('%Y-%m-%d')}.")
