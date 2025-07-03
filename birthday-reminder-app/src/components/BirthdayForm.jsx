@@ -9,10 +9,21 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
     ...(editingBirthday || {}),
   });
 
+  // Helper to extract YYYY-MM-DD from any date string
+  function toDateInputValue(dateStr) {
+    if (!dateStr) return '';
+    // Handles both ISO and plain date
+    const d = new Date(dateStr);
+    // Offset for timezone so the date is not shifted
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const localISO = new Date(d.getTime() - tzOffset).toISOString().slice(0, 10);
+    return localISO;
+  }
+
   useEffect(() => {
     setForm({
       name: editingBirthday?.name || '',
-      date: editingBirthday?.date || '',
+      date: toDateInputValue(editingBirthday?.date),
       email: editingBirthday?.email || '',
       status: editingBirthday?.status || 'Not Sent',
       id: editingBirthday?.id,
@@ -33,10 +44,12 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
       alert('Name, Date of Birth, and Email are required.');
       return;
     }
+    // Always send only the date part (YYYY-MM-DD)
+    const cleanForm = { ...form, date: toDateInputValue(form.date) };
     if (editingBirthday) {
-      onEdit({ ...form });
+      onEdit(cleanForm);
     } else {
-      onAdd({ ...form });
+      onAdd(cleanForm);
     }
   };
 

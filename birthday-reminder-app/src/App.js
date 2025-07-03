@@ -65,12 +65,13 @@ export default function App() {
 
       <div className="top-bar">
         <input
+          className="search-input"
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         {!showForm && (
-          <button onClick={() => { setEditing(null); setShowForm(true); }}>
+          <button className="add-btn" onClick={() => { setEditing(null); setShowForm(true); }}>
             Add
           </button>
         )}
