@@ -6,7 +6,7 @@ from email.message import EmailMessage
 from email.utils import make_msgid
 from mimetypes import guess_type
 
-# ────────── 1. DB credentials ──────────
+# ───── 1. Configuration ─────
 DB_CONFIG = {
     "host": "localhost",
     "port": 5432,
@@ -15,29 +15,11 @@ DB_CONFIG = {
     "password": "postgres"
 }
 
-# ────────── 2. Gmail credentials ───────
 EMAIL_ADDRESS = "asthetic0813@gmail.com"
-EMAIL_PASSWORD = "xfhf kvfu zwjy najd"         # App‑specific password
+EMAIL_PASSWORD = "xfhf kvfu zwjy najd"
+CARD_PATH = "/home/karthik/birthday-stack/service/birthday_card.jpg"
 
-# ────────── 3. Low‑level mail helpers ───
-def _attach_card(msg: EmailMessage, card_path: str = "/home/karthik/birthday-stack/service/birthday_card.jpg"):
-    """Attach + embed an image if file exists."""
-    if not os.path.isfile(card_path):
-        return  # silent: nothing to attach
-
-    maintype, subtype = (guess_type(card_path)[0] or "application/octet-stream").split("/", 1)
-    with open(card_path, "rb") as f:
-        data = f.read()
-
-    cid = make_msgid(domain="birthday.local")  # random <…@birthday.local>
-    msg.add_related(data, maintype=maintype, subtype=subtype, cid=cid[1:-1])  # strip <>
-
-    # Let the HTML refer to the inline image
-    if msg.get_content_type() == "text/html":
-        html = msg.get_content()
-        html += f'<br><img src="cid:{cid[1:-1]}" alt="Happy Birthday card">'
-        msg.set_content(html, subtype="html")
-
+# ───── 2. Email Sending ─────
 def _send(msg: EmailMessage):
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
@@ -47,19 +29,39 @@ def _send(msg: EmailMessage):
     except Exception as e:
         print(f"❌ Failed to send to {msg['To']}: {e}")
 
-# ────────── 4. User‑facing mail helpers ─
+def _embed_card(msg: EmailMessage, cid: str):
+    if not os.path.isfile(CARD_PATH):
+        return
+    maintype, subtype = (guess_type(CARD_PATH)[0] or "application/octet-stream").split("/", 1)
+    with open(CARD_PATH, "rb") as img:
+        msg.get_payload()[1].add_related(img.read(), maintype=maintype, subtype=subtype, cid=cid)
+
+# ───── 3. Message Builders ─────
 def send_birthday_email(to_email, to_name):
-    """Direct wish to the birthday employee."""
     msg = EmailMessage()
     msg["Subject"] = "🎉 Happy Birthday!"
     msg["From"] = EMAIL_ADDRESS
     msg["To"] = to_email
+
+    # Plain-text fallback
     msg.set_content(f"Hi {to_name},\n\nWishing you a very Happy Birthday! 🎂🎈")
-    _attach_card(msg)
+
+    # HTML version
+    cid = make_msgid(domain="birthday.local")[1:-1]
+    html = f"""
+    <html>
+      <body>
+        <p>Hi {to_name},</p>
+        <p>Wishing you a very Happy Birthday! 🎂🎈</p>
+        <img src="cid:{cid}" alt="Birthday Card" style="max-width:500px; border-radius:10px;">
+      </body>
+    </html>
+    """
+    msg.add_alternative(html, subtype="html")
+    _embed_card(msg, cid)
     _send(msg)
 
 def send_birthday_email_to_HR(to_email, to_name, names_list, today):
-    """Daily summary to HR."""
     day_label = "today" if today else "tomorrow"
     msg = EmailMessage()
     msg["Subject"] = f"🎂 Birthday Reminder for {day_label.capitalize()}"
@@ -74,22 +76,32 @@ def send_birthday_email_to_HR(to_email, to_name, names_list, today):
     _send(msg)
 
 def send_birthday_announcement(recipients, birthday_name):
-    """Announcement to everyone else in the company."""
     if not recipients:
         return
     msg = EmailMessage()
     msg["Subject"] = f"🎂 It's {birthday_name}'s Birthday Today!"
     msg["From"] = EMAIL_ADDRESS
-    msg["To"] = ", ".join(recipients)   # a single message with visible To:
+    msg["To"] = ", ".join(recipients)
+
     msg.set_content(
         f"Hello Team,\n\n"
         f"Let's celebrate {birthday_name}'s special day today! "
         f"Drop your wishes and make the day amazing! 🎉🎂"
     )
-    _attach_card(msg)
+
+    cid = make_msgid(domain="birthday.local")[1:-1]
+    html = f"""
+    <html>
+      <body>
+        <p>Hello Team,</p>
+        <p>Let's celebrate <b>{birthday_name}</b>'s special day today! 🎉🎂</p>
+      </body>
+    </html>
+    """
+    msg.add_alternative(html, subtype="html")
     _send(msg)
 
-# ────────── 5. Main routines ────────────
+# ───── 4. Core Logic ─────
 def send_today_birthdays():
     today = datetime.now()
     day, month = today.day, today.month
@@ -97,15 +109,12 @@ def send_today_birthdays():
 
     try:
         with psycopg2.connect(**DB_CONFIG) as conn, conn.cursor() as cur:
-            # 1) Who is celebrating today?
             cur.execute("""
                 SELECT name, email FROM birthdays
-                WHERE EXTRACT(MONTH FROM date) = %s
-                  AND EXTRACT(DAY FROM date)   = %s;
+                WHERE EXTRACT(MONTH FROM date) = %s AND EXTRACT(DAY FROM date) = %s;
             """, (month, day))
             birthday_people = cur.fetchall()
 
-            # 2) All employees (used for announcements)
             cur.execute("SELECT email FROM birthdays;")
             all_emails = [row[0] for row in cur.fetchall()]
 
@@ -113,25 +122,24 @@ def send_today_birthdays():
             print("No birthdays today.")
             return
 
-        # Wish each birthday person
+        # 1. Send wish to each person
         for name, email in birthday_people:
             send_birthday_email(email, name)
 
-        # HR summary
+        # 2. Send HR summary
         names_str = ", ".join(name for name, _ in birthday_people)
         send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str, True)
         send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str, True)
 
-        # Team announcements (one per birthday person keeps subject clear)
+        # 3. Notify team (exclude birthday person)
         for name, email in birthday_people:
-            other_emails = [e for e in all_emails if e != email]
-            send_birthday_announcement(other_emails, name)
+            others = [e for e in all_emails if e != email]
+            send_birthday_announcement(others, name)
 
     except Exception as e:
-        print("Error while checking today's birthdays:", e)
+        print("⚠️ Error while checking today's birthdays:", e)
 
 def get_birthdays_tomorrow():
-    """Only HR summary for tomorrow (no team‑wide mail)."""
     tomorrow = datetime.now() + timedelta(days=1)
     day, month = tomorrow.day, tomorrow.month
     print(f"🔍 Checking birthdays for tomorrow: {tomorrow:%Y-%m-%d}")
@@ -140,23 +148,22 @@ def get_birthdays_tomorrow():
         with psycopg2.connect(**DB_CONFIG) as conn, conn.cursor() as cur:
             cur.execute("""
                 SELECT name FROM birthdays
-                WHERE EXTRACT(MONTH FROM date) = %s
-                  AND EXTRACT(DAY FROM date)   = %s;
+                WHERE EXTRACT(MONTH FROM date) = %s AND EXTRACT(DAY FROM date) = %s;
             """, (month, day))
-            rows = cur.fetchall()
+            results = cur.fetchall()
 
-        if not rows:
+        if not results:
             print("No birthdays tomorrow.")
             return
 
-        names_str = ", ".join(name for (name,) in rows)
+        names_str = ", ".join(name for (name,) in results)
         send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str, False)
         send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str, False)
 
     except Exception as e:
-        print("Error while checking tomorrow's birthdays:", e)
+        print("⚠️ Error while checking tomorrow's birthdays:", e)
 
-# ────────── 6. Entrypoint ───────────────
+# ───── 5. Run ─────
 if __name__ == "__main__":
     send_today_birthdays()
     get_birthdays_tomorrow()
