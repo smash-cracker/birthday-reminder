@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import * as XLSX from 'xlsx';
 
 /* ---------- helper: show YYYY‑MM‑DD ----------------- */
 function toDateDisplay(dateStr) {
@@ -62,6 +63,9 @@ function BirthdayTable({
   /* ---------- state for confirmation dialog ---------- */
   const [confirm, setConfirm] = useState(null); // { id, name }
 
+  // Popup state for upload feedback
+  const [uploadStatus, setUploadStatus] = useState(null); // { success: true/false, message: string }
+
   const sortedBirthdays = [...birthdays].sort(
     (a, b) => daysUntilNextBirthday(a.date) - daysUntilNextBirthday(b.date)
   );
@@ -106,46 +110,89 @@ function BirthdayTable({
     setSearch((s) => s + ' ');
   };
 
-  // Unified file upload handler (CSV/TXT/SVG)
+  // Unified file upload handler (CSV/TXT/SVG/XLSX/XLS)
   const handleFileInsert = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      const text = evt.target.result;
-      let entries = [];
 
-      if (file.name.endsWith('.svg')) {
-        // SVG: extract <text> nodes, expect comma-separated values
-        const matches = [...text.matchAll(/<text[^>]*>([^<]*)<\/text>/g)];
-        entries = matches.map((m) => m[1]);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        // --- Excel path ---
+        const data = await file.arrayBuffer();
+        const wb = XLSX.read(data, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        for (const row of rows) {
+          const [name, dateInput, email] = row.map((v) => v && v.toString().trim());
+          if (!name || !dateInput || !email) { failCount++; continue; }
+          const dateObj = new Date(dateInput);
+          if (isNaN(dateObj)) { failCount++; continue; }
+          const tzOffset = dateObj.getTimezoneOffset() * 60000;
+          const date = new Date(dateObj - tzOffset).toISOString().slice(0, 10);
+          const resp = await fetch('http://localhost:5000/api/birthdays', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, date, email }),
+          });
+          if (resp.ok) successCount++; else failCount++;
+        }
       } else {
-        entries = text
-          .split('\n')
-          .map((l) => l.trim())
-          .filter(Boolean);
-      }
+        // --- original text/CSV/SVG path ---
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          const text = evt.target.result;
+          let entries = [];
 
-      for (const entry of entries) {
-        const [name, dateInput, email] = entry
-          .split(',')
-          .map((s) => s && s.trim());
-        if (!name || !dateInput || !email) continue;
-        const dateObj = new Date(dateInput);
-        if (isNaN(dateObj.getTime())) continue;
-        const tzOffset = dateObj.getTimezoneOffset() * 60000;
-        const date = new Date(dateObj.getTime() - tzOffset)
-          .toISOString()
-          .slice(0, 10);
-        await fetch('http://localhost:5000/api/birthdays', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, date, email }),
-        });
+          if (file.name.endsWith('.svg')) {
+            const matches = [...text.matchAll(/<text[^>]*>([^<]*)<\/text>/g)];
+            entries = matches.map((m) => m[1]);
+          } else {
+            entries = text
+              .split('\n')
+              .map((l) => l.trim())
+              .filter(Boolean);
+          }
+
+          for (const entry of entries) {
+            const [name, dateInput, email] = entry
+              .split(',')
+              .map((s) => s && s.trim());
+            if (!name || !dateInput || !email) { failCount++; continue; }
+            const dateObj = new Date(dateInput);
+            if (isNaN(dateObj.getTime())) { failCount++; continue; }
+            const tzOffset = dateObj.getTimezoneOffset() * 60000;
+            const date = new Date(dateObj.getTime() - tzOffset)
+              .toISOString()
+              .slice(0, 10);
+            const resp = await fetch('http://localhost:5000/api/birthdays', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, date, email }),
+            });
+            if (resp.ok) successCount++; else failCount++;
+          }
+          setSearch((s) => s + ' ');
+          setUploadStatus({
+            success: failCount === 0,
+            message: `Upload finished: ${successCount} added, ${failCount} failed.`,
+          });
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+        return;
       }
       setSearch((s) => s + ' ');
-    };
-    reader.readAsText(file);
+      setUploadStatus({
+        success: failCount === 0,
+        message: `Upload finished: ${successCount} added, ${failCount} failed.`,
+      });
+    } catch (err) {
+      setUploadStatus({ success: false, message: 'Upload failed: ' + err.message });
+    }
     e.target.value = '';
   };
 
@@ -177,12 +224,35 @@ function BirthdayTable({
           Upload
           <input
             type="file"
-            accept=".csv,.txt,.svg"
+            accept=".csv,.txt,.svg,.xlsx,.xls"
             style={{ display: 'none' }}
             onChange={handleFileInsert}
           />
         </label>
       </div>
+
+      {/* Upload status popup */}
+      {uploadStatus && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 30,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: uploadStatus.success ? '#28a745' : '#dc3545',
+            color: '#fff',
+            padding: '0.8rem 1.5rem',
+            borderRadius: 8,
+            zIndex: 2000,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+            fontWeight: 500,
+            fontSize: '1rem',
+          }}
+          onClick={() => setUploadStatus(null)}
+        >
+          {uploadStatus.message}
+        </div>
+      )}
 
       {/* Scrollable Table with Fixed Header */}
       <div className="table-wrapper" style={{ maxHeight: '400px', overflowY: 'auto' }}>
