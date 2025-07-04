@@ -9,9 +9,11 @@ export default function App() {
   const [editing, setEditing] = useState(null);
   const [search, setSearch] = useState('');
 
+  const hostIp = '172.16.11.154';
+
   // Fetch once
   useEffect(() => {
-    fetch('http://localhost:5000/api/birthdays')
+    fetch(`http://${hostIp}:5000/api/birthdays`)
       .then(r => r.json())
       .then(setBirthdays)
       .catch(console.error);
@@ -19,7 +21,7 @@ export default function App() {
 
   /* ---------- CRUD helpers ---------- */
   const addBirthday = (data) =>
-    fetch('http://localhost:5000/api/birthdays', {
+    fetch(`http://${hostIp}:5000/api/birthdays`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -31,13 +33,13 @@ export default function App() {
       });
 
   const deleteBirthday = (id) =>
-    fetch(`http://localhost:5000/api/birthdays/${id}`, { method: 'DELETE' })
+    fetch(`http://${hostIp}:5000/api/birthdays/${id}`, { method: 'DELETE' })
       .then((r) => {
         if (r.ok) setBirthdays((prev) => prev.filter((b) => b.id !== id));
       });
 
   const editBirthday = (data) =>
-    fetch(`http://localhost:5000/api/birthdays/${data.id}`, {
+    fetch(`http://${hostIp}:5000/api/birthdays/${data.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
