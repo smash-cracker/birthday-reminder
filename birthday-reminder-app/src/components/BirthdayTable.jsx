@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 /* ---------- helper: show YYYY‑MM‑DD ----------------- */
 function toDateDisplay(dateStr) {
@@ -26,6 +26,29 @@ function daysUntilNextBirthday(dateStr) {
   return Math.round(diffMs / 86_400_000);
 }
 
+/* ---------- small reusable confirm modal ---------- */
+function ConfirmModal({ name, onConfirm, onCancel }) {
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-box">
+        <h3>Delete Birthday?</h3>
+        <p>
+          Are you sure you want to delete <strong>{name}</strong>?<br /> This action
+          cannot be undone.
+        </p>
+        <div className="modal-actions">
+          <button className="btn btn-danger" onClick={onConfirm}>
+            Delete
+          </button>
+          <button className="btn" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BirthdayTable({
   birthdays,
   onDelete,
@@ -36,9 +59,21 @@ function BirthdayTable({
   setShowForm,
   setEditing,
 }) {
+  /* ---------- state for confirmation dialog ---------- */
+  const [confirm, setConfirm] = useState(null); // { id, name }
+
   const sortedBirthdays = [...birthdays].sort(
     (a, b) => daysUntilNextBirthday(a.date) - daysUntilNextBirthday(b.date)
   );
+
+  const requestDelete = (id, name) => setConfirm({ id, name });
+  const confirmDelete = () => {
+    if (confirm) {
+      onDelete(confirm.id);
+      setConfirm(null);
+    }
+  };
+  const cancelDelete = () => setConfirm(null);
 
   // Insert handler
   const handleInsert = async () => {
@@ -54,7 +89,9 @@ function BirthdayTable({
     }
     // Format as YYYY-MM-DD for backend
     const tzOffset = dateObj.getTimezoneOffset() * 60000;
-    const date = new Date(dateObj.getTime() - tzOffset).toISOString().slice(0, 10);
+    const date = new Date(dateObj.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 10);
 
     // Prompt for email (required for backend)
     const email = prompt('Enter email:');
@@ -83,16 +120,23 @@ function BirthdayTable({
         const matches = [...text.matchAll(/<text[^>]*>([^<]*)<\/text>/g)];
         entries = matches.map((m) => m[1]);
       } else {
-        entries = text.split('\n').map((l) => l.trim()).filter(Boolean);
+        entries = text
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(Boolean);
       }
 
       for (const entry of entries) {
-        const [name, dateInput, email] = entry.split(',').map((s) => s && s.trim());
+        const [name, dateInput, email] = entry
+          .split(',')
+          .map((s) => s && s.trim());
         if (!name || !dateInput || !email) continue;
         const dateObj = new Date(dateInput);
         if (isNaN(dateObj.getTime())) continue;
         const tzOffset = dateObj.getTimezoneOffset() * 60000;
-        const date = new Date(dateObj.getTime() - tzOffset).toISOString().slice(0, 10);
+        const date = new Date(dateObj.getTime() - tzOffset)
+          .toISOString()
+          .slice(0, 10);
         await fetch('http://localhost:5000/api/birthdays', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -143,7 +187,17 @@ function BirthdayTable({
       {/* Scrollable Table with Fixed Header */}
       <div className="table-wrapper" style={{ maxHeight: '400px', overflowY: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ display: 'table', width: '100%', tableLayout: 'fixed', background: '#f8f8f8', position: 'sticky', top: 0, zIndex: 1 }}>
+          <thead
+            style={{
+              display: 'table',
+              width: '100%',
+              tableLayout: 'fixed',
+              background: '#f8f8f8',
+              position: 'sticky',
+              top: 0,
+              zIndex: 1,
+            }}
+          >
             <tr>
               <th style={{ width: '20%' }}>Name</th>
               <th style={{ width: '20%' }}>Date</th>
@@ -178,7 +232,7 @@ function BirthdayTable({
                     ✏️
                   </button>
                   <button
-                    onClick={() => onDelete(b.id)}
+                    onClick={() => requestDelete(b.id, b.name)}
                     title="Delete"
                     style={{
                       cursor: 'pointer',
@@ -195,6 +249,15 @@ function BirthdayTable({
           </tbody>
         </table>
       </div>
+
+      {/* confirmation dialog */}
+      {confirm && (
+        <ConfirmModal
+          name={confirm.name}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   );
 }
