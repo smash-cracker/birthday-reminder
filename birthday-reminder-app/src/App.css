@@ -1,16 +1,75 @@
+/* .app {
+  font-family: Arial, sans-serif;
+  text-align: center; */
+  /* padding: 1rem; */
+  /* background-color: #fefefe;
+} */
+/* ✨ UPDATED – make header a horizontal flex row */
+/* .header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;      
+  font-size: 1rem; 
+  color: #222;
+  margin-bottom: 1rem;
+} */
+
+/* ✨ NEW – control logo size */
+/* .logo { */
+  /* width: 48px;       adjust as needed */
+  /* height: 48px;
+  object-fit: contain;
+} */
+/* Outer app container */
 .app {
   font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 1rem;
   background-color: #fefefe;
 }
 
-.header {
-  font-size: 2.5rem;
-  color: #222;
-  margin-bottom: 1rem;
-  margin-top: auto;
+/* Flex container: full-width */
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  position: relative;
 }
+
+/* Logo fixed to left */
+.logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* Center title absolutely */
+.header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  color: #222;
+  margin: 0;
+}
+.logo-text {
+  font-weight: bold;
+  font-size: 2.4rem;
+  /* color: #333; */
+  line-height: 1;              /* tighten vertical spacing */
+  position: relative;
+  top: -4px; 
+
+}
+
+/* colors for the two pieces */
+.logo-part1 {
+  color: #1f3890;          /* blue (choose any shade you like) */
+}
+
+.logo-part2 {
+  color: #008985;          /* green */
+}
+
 
 .container {
   background: white;

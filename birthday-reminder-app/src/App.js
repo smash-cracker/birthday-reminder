@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import BirthdayForm from './components/BirthdayForm';
 import BirthdayTable from './components/BirthdayTable';
 import './App.css';
+// ⬅️ make sure the folder name matches exactly
+import logo from './assests/logo.svg';
+
 
 export default function App() {
   const [birthdays, setBirthdays] = useState([]);
@@ -62,8 +65,25 @@ export default function App() {
   });
 
   return (
-    <div className="app">
-      <h1 className="header">🎉 Birthday Reminder</h1>
+      <div className="app">
+      {/* ✨ CHANGED – wrap header in a <header> tag and insert the logo */}
+      {/* <header className="header">
+        <img src={logo} alt="Logo" className="logo" />
+        <h1>🎉 Birthday Reminder</h1>
+      </header> */}
+
+
+   <header className="header-bar">
+  <div className="logo-section">
+    <img src={logo} alt="Logo" className="logo" />
+    <span className="logo-text">
+      <span className="logo-part1">ezen</span>
+      <span className="logo-part2">Tech</span>
+    </span>  </div>
+  <h1 className="header-title">🎉 Birthday Reminder</h1>
+</header>
+
+
 
       <div className="container">
         {showForm && (
