@@ -339,3 +339,30 @@
 .btn-danger {
   background: #dc3545;
 }
+
+/* ===== Footer Styles ===== */
+.footer {
+  width: 100%;
+  background: #f8f9fa;
+  /* color: #444; */
+  text-align: center;
+  /* padding: 1rem 0 0.5rem 0; */
+  padding: 0.8rem 0 0.5rem 0;
+  font-size: 1rem;
+  border-top: 1px solid #e0e0e0;
+  /* margin-top: 1rem; */
+  margin-top: 0.2rem;
+  letter-spacing: 0.02em;
+}
+
+.footer a {
+  color: #1f3890;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.footer a:hover {
+  color: #008985;
+  text-decoration: underline;
+}

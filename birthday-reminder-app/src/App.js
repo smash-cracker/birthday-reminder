@@ -110,6 +110,10 @@ export default function App() {
           setEditing={setEditing}
         />
       </div>
+      <footer className="footer">
+        {/* © {new Date().getFullYear()} CezenTech. Made with <span style={{color:'#dc3545'}}>♥</span> by <a href="https://github.com/" target="_blank" rel="noopener noreferrer">software Team</a> */}
+        © {new Date().getFullYear()} CezenTech. Made with <span style={{color:'#dc3545'}}>♥</span> by Cezen Software Team
+      </footer>
     </div>
   );
 }
