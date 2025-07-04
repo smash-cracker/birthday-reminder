@@ -31,6 +31,73 @@ function BirthdayTable({ birthdays, onDelete, onEdit, search, setSearch, showFor
     (a, b) => daysUntilNextBirthday(a.date) - daysUntilNextBirthday(b.date)
   );
 
+  // Insert handler
+  const handleInsert = async () => {
+    const name = prompt('Enter name:');
+    if (!name) return;
+    const dateInput = prompt('Enter date of birth (any format):');
+    if (!dateInput) return;
+    // Try to parse date
+    const dateObj = new Date(dateInput);
+    if (isNaN(dateObj.getTime())) {
+      alert('Invalid date format.');
+      return;
+    }
+    // Format as YYYY-MM-DD for backend
+    const tzOffset = dateObj.getTimezoneOffset() * 60000;
+    const date = new Date(dateObj.getTime() - tzOffset).toISOString().slice(0, 10);
+
+    // Prompt for email (required for backend)
+    const email = prompt('Enter email:');
+    if (!email) return;
+
+    // Send to backend
+    await fetch('http://localhost:5000/api/birthdays', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, date, email }),
+    });
+    // Optionally, trigger a refresh in parent by calling setSearch or similar
+    setSearch(s => s + ' '); // Triggers parent re-filter/fetch if needed
+  };
+
+  // Unified file upload handler (CSV/TXT/SVG)
+  const handleFileInsert = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const text = evt.target.result;
+      let entries = [];
+
+      if (file.name.endsWith('.svg')) {
+        // SVG: extract <text> nodes, expect comma-separated values
+        const matches = [...text.matchAll(/<text[^>]*>([^<]*)<\/text>/g)];
+        entries = matches.map(m => m[1]);
+      } else {
+        // CSV/TXT: split by lines
+        entries = text.split('\n').map(l => l.trim()).filter(Boolean);
+      }
+
+      for (const entry of entries) {
+        const [name, dateInput, email] = entry.split(',').map(s => s && s.trim());
+        if (!name || !dateInput || !email) continue;
+        const dateObj = new Date(dateInput);
+        if (isNaN(dateObj.getTime())) continue;
+        const tzOffset = dateObj.getTimezoneOffset() * 60000;
+        const date = new Date(dateObj.getTime() - tzOffset).toISOString().slice(0, 10);
+        await fetch('http://localhost:5000/api/birthdays', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, date, email }),
+        });
+      }
+      setSearch(s => s + ' '); // trigger refresh
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="birthday-table">
       <div className="top-bar">
@@ -46,6 +113,15 @@ function BirthdayTable({ birthdays, onDelete, onEdit, search, setSearch, showFor
             Add
           </button>
         )}
+        <label className="add-btn" style={{ background: '#17a2b8', marginLeft: 8, cursor: 'pointer' }}>
+          Upload
+          <input
+            type="file"
+            accept=".csv,.txt,.svg"
+            style={{ display: 'none' }}
+            onChange={handleFileInsert}
+          />
+        </label>
       </div>
       <table>
         <thead>
