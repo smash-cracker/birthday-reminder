@@ -50,6 +50,30 @@ function ConfirmModal({ name, onConfirm, onCancel }) {
   );
 }
 
+// Add a modal for bulk delete confirmation
+function BulkDeleteModal({ count, onConfirm, onCancel }) {
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-box">
+        <h3>Delete Selected?</h3>
+        <p>
+          Are you sure you want to delete <strong>{count}</strong> selected birthdays?
+          <br />
+          This action cannot be undone.
+        </p>
+        <div className="modal-actions">
+          <button className="btn btn-danger" onClick={onConfirm}>
+            Delete All
+          </button>
+          <button className="btn" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BirthdayTable({
   birthdays,
   onDelete,
@@ -65,6 +89,11 @@ function BirthdayTable({
 
   // Popup state for upload feedback
   const [uploadStatus, setUploadStatus] = useState(null); // { success: true/false, message: string }
+
+  // Bulk delete state
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkConfirm, setBulkConfirm] = useState(false);
 
   const sortedBirthdays = [...birthdays].sort(
     (a, b) => daysUntilNextBirthday(a.date) - daysUntilNextBirthday(b.date)
@@ -196,39 +225,132 @@ function BirthdayTable({
     e.target.value = '';
   };
 
+  // Bulk select handlers
+  const handleBulkMode = () => {
+    setBulkMode(true);
+    setSelectedIds([]);
+  };
+  const handleBulkCancel = () => {
+    setBulkMode(false);
+    setSelectedIds([]);
+  };
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(sortedBirthdays.map((b) => b.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+  const handleSelectOne = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setBulkConfirm(true);
+  };
+  const confirmBulkDelete = () => {
+    selectedIds.forEach((id) => onDelete(id));
+    setBulkMode(false);
+    setSelectedIds([]);
+    setBulkConfirm(false);
+  };
+  const cancelBulkDelete = () => setBulkConfirm(false);
+
   return (
     <div className="birthday-table">
-      <div className="top-bar">
-        <h2>Upcoming Birthdays</h2>
-        <input
-          className="search-input"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {!showForm && (
-          <button
-            className="add-btn"
-            onClick={() => {
-              setEditing(null);
-              setShowForm(true);
-            }}
-          >
-            Add
-          </button>
-        )}
-        <label
-          className="add-btn"
-          style={{ background: '#17a2b8', marginLeft: 8, cursor: 'pointer' }}
+      {/* ---------- TOP BAR (re‑ordered) ---------- */}
+      <div
+        className="top-bar"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          flexWrap: 'wrap',
+        }}
+      >
+        {/* LEFT – Bulk controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {!bulkMode && (
+            <button
+              className="add-btn"
+              style={{ background: '#ffc107' }}
+              onClick={handleBulkMode}
+              title="Bulk Delete"
+            >
+              Bulk Delete
+            </button>
+          )}
+          {bulkMode && (
+            <>
+              <button
+                className="add-btn"
+                style={{
+                  background: selectedIds.length ? '#dc3545' : '#aaa',
+                  cursor: selectedIds.length ? 'pointer' : 'not-allowed',
+                }}
+                onClick={handleBulkDelete}
+                disabled={!selectedIds.length}
+              >
+                Delete Selected
+              </button>
+              <button
+                className="add-btn"
+                style={{ background: '#6c757d' }}
+                onClick={handleBulkCancel}
+              >
+                Cancel
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* CENTER ­– Heading (flex: 1 to stay centered) */}
+        <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>
+          Upcoming Birthdays
+        </h2>
+
+        {/* RIGHT – Search, Add, Upload */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginLeft: 'auto',
+          }}
         >
-          Upload
           <input
-            type="file"
-            accept=".csv,.txt,.svg,.xlsx,.xls"
-            style={{ display: 'none' }}
-            onChange={handleFileInsert}
+            className="search-input"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-        </label>
+          {!showForm && !bulkMode && (
+            <button
+              className="add-btn"
+              onClick={() => {
+                setEditing(null);
+                setShowForm(true);
+              }}
+            >
+              Add
+            </button>
+          )}
+          <label
+            className="add-btn"
+            style={{ background: '#17a2b8', cursor: 'pointer' }}
+          >
+            Upload
+            <input
+              type="file"
+              accept=".csv,.txt,.svg,.xlsx,.xls"
+              style={{ display: 'none' }}
+              onChange={handleFileInsert}
+            />
+          </label>
+        </div>
       </div>
 
       {/* Upload status popup */}
@@ -269,7 +391,20 @@ function BirthdayTable({
             }}
           >
             <tr>
-              <th style={{ width: '20%' }}>Name</th>
+              {bulkMode && (
+                <th style={{ width: '4%' }}>
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedIds.length === sortedBirthdays.length &&
+                      sortedBirthdays.length > 0
+                    }
+                    onChange={handleSelectAll}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
+              )}
+              <th style={{ width: bulkMode ? '16%' : '20%' }}>Name</th>
               <th style={{ width: '20%' }}>Date</th>
               <th style={{ width: '25%' }}>Email</th>
               <th style={{ width: '15%' }}>Status</th>
@@ -279,7 +414,17 @@ function BirthdayTable({
           <tbody style={{ display: 'block', width: '100%', tableLayout: 'fixed' }}>
             {sortedBirthdays.map((b) => (
               <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
-                <td style={{ width: '20%' }}>{b.name}</td>
+                {bulkMode && (
+                  <td style={{ width: '4%', textAlign: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(b.id)}
+                      onChange={() => handleSelectOne(b.id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
+                )}
+                <td style={{ width: bulkMode ? '16%' : '20%' }}>{b.name}</td>
                 <td style={{ width: '20%' }}>{toDateDisplay(b.date)}</td>
                 <td style={{ width: '25%' }}>{b.email}</td>
                 <td style={{ width: '15%' }}>
@@ -288,31 +433,35 @@ function BirthdayTable({
                   </span>
                 </td>
                 <td style={{ width: '20%' }}>
-                  <button
-                    onClick={() => onEdit(b)}
-                    title="Edit"
-                    style={{
-                      cursor: 'pointer',
-                      marginRight: '0.5rem',
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '1.1rem',
-                    }}
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => requestDelete(b.id, b.name)}
-                    title="Delete"
-                    style={{
-                      cursor: 'pointer',
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '1.1rem',
-                    }}
-                  >
-                    🗑️
-                  </button>
+                  {!bulkMode && (
+                    <>
+                      <button
+                        onClick={() => onEdit(b)}
+                        title="Edit"
+                        style={{
+                          cursor: 'pointer',
+                          marginRight: '0.5rem',
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '1.1rem',
+                        }}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => requestDelete(b.id, b.name)}
+                        title="Delete"
+                        style={{
+                          cursor: 'pointer',
+                          background: 'none',
+                          border: 'none',
+                          fontSize: '1.1rem',
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
@@ -326,6 +475,13 @@ function BirthdayTable({
           name={confirm.name}
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
+        />
+      )}
+      {bulkConfirm && (
+        <BulkDeleteModal
+          count={selectedIds.length}
+          onConfirm={confirmBulkDelete}
+          onCancel={cancelBulkDelete}
         />
       )}
     </div>
