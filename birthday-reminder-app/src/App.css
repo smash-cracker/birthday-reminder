@@ -57,7 +57,8 @@
   /* color: #333; */
   line-height: 1;              /* tighten vertical spacing */
   position: relative;
-  top: -4px; 
+  top: -6px;
+  margin-left: -3%; 
 
 }
 
