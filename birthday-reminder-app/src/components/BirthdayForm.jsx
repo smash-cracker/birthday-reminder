@@ -78,7 +78,7 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
         onChange={handleChange}
         required
       />
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem',justifyContent:'space-between' }}>
         <button type="submit">
           {editingBirthday ? 'Save' : 'Add'}
         </button>
