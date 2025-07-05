@@ -158,7 +158,18 @@
   gap: 1rem;
   flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
+.table-heading {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  min-width: 180px;
+}
 
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .add-btn {
   padding: 0.6rem 1.2rem;
   background: #007bff;
@@ -250,6 +261,7 @@
   .top-bar {
     flex-direction: column; /* Stack vertically on smaller screens */
     align-items: stretch;
+    gap: 0.5rem;
   }
   .search-input {
     max-width: 100%; /* Full width on smaller screens */
@@ -257,6 +269,14 @@
   .birthday-table h2 {
     font-size: 1.3rem;
     text-align: center; /* Center heading on smaller screens */
+  }
+  .right-controls {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .table-heading {
+    text-align: center;
+    margin: 0.5rem 0;
   }
 }
 
@@ -423,17 +443,20 @@
   }
   .header-bar {
     flex-direction: column;
-    gap: 0.5rem;
+    align-items: center;
+    /* gap: 0.5rem; */
   }
   .header-title {
     position: static;
     transform: none;
     text-align: center;
+    margin-top: 0.5rem;
   }
   .logo-section {
-    display: flex;
-    align-items: center;
+    /* display: flex;
+    align-items: center; */
     justify-content: center;
+    margin-bottom: 0.5rem;
   }
 }
 
@@ -484,6 +507,7 @@
   }
   .header-title {
     font-size: clamp(1.2rem, 3vw, 1.5rem);
+    /* margin-top: -5% */
   }
   .logo-text {
     font-size: clamp(1.4rem, 3.5vw, 1.8rem);

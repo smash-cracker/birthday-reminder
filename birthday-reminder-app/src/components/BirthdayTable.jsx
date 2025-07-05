@@ -404,11 +404,11 @@ function BirthdayTable({
                   />
                 </th>
               )}
-              <th style={{ width: bulkMode ? '16%' : '20%' }}>Name</th>
-              <th style={{ width: '20%' }}>Date</th>
-              <th style={{ width: '25%' }}>Email</th>
-              <th style={{ width: '15%' }}>Status</th>
-              <th style={{ width: '20%' }}>Actions</th>
+              <th style={{ width: bulkMode ? '22%' : '25%' }}>Name</th>
+              <th style={{ width: '25%' }}>Date</th>
+              <th style={{ width: '30%' }}>Email</th>
+              {/* <th style={{ width: '15%' }}>Status</th> */}
+              <th style={{ width: bulkMode ? '19%' : '20%' }}>Actions</th>
             </tr>
           </thead>
           <tbody style={{ display: 'block', width: '100%', tableLayout: 'fixed' }}>
@@ -424,15 +424,15 @@ function BirthdayTable({
                     />
                   </td>
                 )}
-                <td style={{ width: bulkMode ? '16%' : '20%' }}>{b.name}</td>
-                <td style={{ width: '20%' }}>{toDateDisplay(b.date)}</td>
-                <td style={{ width: '25%' }}>{b.email}</td>
-                <td style={{ width: '15%' }}>
+                <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
+                <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
+                <td style={{ width: '30%' }}>{b.email}</td>
+                {/* <td style={{ width: '15%' }}>
                   <span className={`status ${b.status === 'Sent' ? 'sent' : 'not-sent'}`}>
                     {b.status}
                   </span>
-                </td>
-                <td style={{ width: '20%' }}>
+                </td> */}
+                <td style={{ width: bulkMode ? '19%' : '20%' }}>
                   {!bulkMode && (
                     <>
                       <button
