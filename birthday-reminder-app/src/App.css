@@ -33,6 +33,7 @@
   justify-content: space-between;
   padding: 0.5rem 1rem;
   position: relative;
+  min-width: 500px;
 }
 
 /* Logo fixed to left */
@@ -73,6 +74,7 @@
 
 
 .container {
+  min-width: 500px;;
   background: white;
   padding: 2rem;
   border-radius: 12px;
@@ -180,6 +182,10 @@
   font-size: 1rem;
 }
 
+     /* .smallHeader {
+      display: none;
+    }
+*/
 .add-btn:hover {
   background-color: #0056b3;
 }
@@ -216,7 +222,6 @@
 .birthday-table h2 {
   margin: 0; /* Remove default margin for inline alignment */
   font-size: 1.5rem; /* Adjust size to match button/input */
-  flex: 1; /* Allow heading to take available space */
   margin-left: 35%;
 }
 
@@ -244,7 +249,11 @@
   position: relative;
   animation: popupFade 0.3s ease-in-out;
 }
-
+  .top-bar {
+    flex-direction: column; /* Stack vertically on smaller screens */
+    align-items: stretch;
+    gap: 0.5rem;
+  }
 @keyframes popupFade {
   from {
     opacity: 0;
@@ -258,11 +267,7 @@
 
 /* Responsive styles */
 @media (max-width: 800px) {
-  .top-bar {
-    flex-direction: column; /* Stack vertically on smaller screens */
-    align-items: stretch;
-    gap: 0.5rem;
-  }
+
   .search-input {
     max-width: 100%; /* Full width on smaller screens */
   }
@@ -270,17 +275,34 @@
     font-size: 1.3rem;
     text-align: center; /* Center heading on smaller screens */
   }
-  .right-controls {
-    justify-content: flex-end;
-    flex-wrap: wrap;
-  }
   .table-heading {
     text-align: center;
     margin: 0.5rem 0;
   }
 }
 
+@media (min-width: 1200px) {
+        .smallHeader {
+      display: none;
+    }
+    .largeHeader {
+      display: block;
+    }
+}
+
+
+@media (max-width: 1200px) {
+        .smallHeader {
+      display: block;
+    }
+    .largeHeader {
+      display: none;
+    }
+}
+
+
 @media (max-width: 600px) {
+ 
   .top-bar {
     gap: 0.5rem;
   }
@@ -360,10 +382,20 @@
   background: #dc3545;
 }
 
+.edit-btn {
+  cursor: pointer;
+  margin-right: 0.5rem;
+  background: none;
+  border: 1px solid grey;
+  background-color: wheat;
+  font-size: 1.1rem;
+  border-radius: 0.2rem;
+  transform: rotateY(180deg);
+}
+
 /* ===== Footer Styles ===== */
 .footer {
-  width: 100%;
-  background: #f8f9fa;
+min-width: 500px;  background: #f8f9fa;
   /* color: #444; */
   text-align: center;
   /* padding: 1rem 0 0.5rem 0; */
@@ -385,6 +417,18 @@
 .footer a:hover {
   color: #008985;
   text-decoration: underline;
+}
+/* ===== Responsive Footer Adjustments ===== */
+@media (max-width: 600px) {
+  .footer {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.5rem 0.4rem 0.5rem;
+  }
+
+  .footer a {
+    display: inline-block;
+    word-break: break-word;
+  }
 }
 
 
@@ -413,8 +457,12 @@
 
 /* Responsive styles for different screen sizes */
 @media (max-width: 1200px) {
-  .container {
+  /* .container {
     padding: clamp(0.8rem, 2vw, 1.5rem);
+  } */
+   .container {
+    padding: clamp(0.8rem, 2vw, 1.5rem);
+    max-width: clamp(500px, 95vw, 1000px); /* Slightly narrower max-width for medium screens */
   }
   .birthday-table h2 {
     margin-left: 0; /* Remove offset for better centering */
@@ -429,6 +477,13 @@
 }
 
 @media (max-width: 800px) {
+
+  body {
+    transform: scale(0.75);         /* Adjust scale as needed */
+    transform-origin: top left;    /* Keep scaling from top-left */
+    width: 125%;                   /* Compensate for scale shrink */
+    overflow-x: hidden;            /* Prevent horizontal scroll */
+  }
   .top-bar {
     flex-direction: column;
     align-items: stretch;
@@ -487,6 +542,7 @@
 }
 
 @media (max-width: 480px) {
+
   .top-bar {
     gap: 0.3rem;
   }

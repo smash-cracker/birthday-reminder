@@ -13,7 +13,8 @@ export default function App() {
   const [search, setSearch] = useState('');
 
   // const hostIp = '127.0.0.1';
-  const hostIp = '172.16.11.154';
+  // const hostIp = '172.16.11.154';
+  const hostIp = '192.168.1.34';
 
   // Fetch once
   useEffect(() => {

@@ -261,6 +261,10 @@ function BirthdayTable({
   return (
     <div className="birthday-table">
       {/* ---------- TOP BAR (re‑ordered) ---------- */}
+        {/* CENTER ­– Heading (flex: 1 to stay centered) */}
+        <h2 className='smallHeader' style={{ flex: 1, textAlign: 'center', margin: 0 }}>
+          Upcoming Birthdays
+        </h2>
       <div
         className="top-bar"
         style={{
@@ -271,9 +275,10 @@ function BirthdayTable({
           flexWrap: 'wrap',
         }}
       >
+        
         {/* LEFT – Bulk controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {!bulkMode && (
+          {/* {!bulkMode && (
             <button
               className="add-btn"
               style={{ background: '#ffc107' }}
@@ -282,7 +287,8 @@ function BirthdayTable({
             >
               Bulk Delete
             </button>
-          )}
+          )} */}
+          
           {bulkMode && (
             <>
               <button
@@ -307,12 +313,8 @@ function BirthdayTable({
           )}
         </div>
 
-        {/* CENTER ­– Heading (flex: 1 to stay centered) */}
-        <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>
-          Upcoming Birthdays
-        </h2>
-
         {/* RIGHT – Search, Add, Upload */}
+        
         <div
           style={{
             display: 'flex',
@@ -321,6 +323,22 @@ function BirthdayTable({
             marginLeft: 'auto',
           }}
         >
+            {!bulkMode && (
+            <button
+              className="add-btn"
+              style={{ background: '#ffc107' }}
+              onClick={handleBulkMode}
+              title="Bulk Delete"
+            >
+              Bulk Delete
+            </button>
+          )}
+        {/* CENTER ­– Heading (flex: 1 to stay centered) */}
+        <h2 className='largeHeader' style={{ textAlign: 'center', margin: 0 }}>
+          Upcoming Birthdays
+        </h2>
+
+
           <input
             className="search-input"
             placeholder="Search..."
@@ -438,11 +456,10 @@ function BirthdayTable({
                       <button
                         onClick={() => onEdit(b)}
                         title="Edit"
+                        className='edit-btn'
                         style={{
                           cursor: 'pointer',
                           marginRight: '0.5rem',
-                          background: 'none',
-                          border: 'none',
                           fontSize: '1.1rem',
                         }}
                       >
