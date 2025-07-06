@@ -335,12 +335,13 @@ function BirthdayTable({
           )}
         </div>
         {/* CENTER ­– Heading (flex: 1 to stay centered) */}
-        <h2 className='largeHeader' style={{ textAlign: 'center', margin: 0 }}>
+        <h2 className='largeHeader' style={{ textAlign: 'center', marginLeft:'auto' }}>
           Upcoming Birthdays
         </h2>
 
 
-          <input
+          <div className="right-side">
+            <input
             className="search-input"
             placeholder="Search..."
             value={search}
@@ -369,6 +370,7 @@ function BirthdayTable({
               onChange={handleFileInsert}
             />
           </label>
+          </div>
         </div>
       </div>
 
