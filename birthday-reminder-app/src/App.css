@@ -411,8 +411,12 @@ background: #f8f9fa;
   font-size: 1rem;
   border-top: 1px solid #e0e0e0;
   letter-spacing: 0.02em;
-  position: absolute;
-  bottom: 0;
+  /* Remove absolute positioning to prevent overlap */
+  /* position: absolute;
+  bottom: 0; */
+  /* Add margin-top for spacing from content */
+  margin-top: 0.2rem;
+  box-sizing: border-box;
 }
 
 .footer a {
@@ -428,10 +432,11 @@ background: #f8f9fa;
 }
 /* ===== Responsive Footer Adjustments ===== */
 @media (max-width: 600px) {
-  /* .footer {
-    font-size: 0.9rem;
-    padding: 0.6rem 0.5rem 0.4rem 0.5rem;
-  } */
+  .footer {
+    font-size: 0.95rem;
+    padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+    margin-top: 0.5rem;
+  }
 
   .footer a {
     display: inline-block;
