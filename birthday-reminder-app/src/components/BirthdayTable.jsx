@@ -155,8 +155,30 @@ function BirthdayTable({
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        for (const row of rows) {
-          const [name, dateInput, email] = row.map((v) => v && v.toString().trim());
+        // --- header mapping logic (fix here) ---
+        const getColMap = (headerRow) => {
+          const map = {};
+          headerRow.forEach((col, idx) => {
+            if (typeof col === 'string') {
+              const key = col.trim().toLowerCase();
+              if (key === 'name') map.name = idx;
+              if (key === 'date') map.date = idx;
+              if (key === 'email') map.email = idx;
+            }
+          });
+          return map;
+        };
+        const map = getColMap(rows[0]);
+        // ✅ header check – fixed
+        if (map.name === undefined || map.date === undefined || map.email === undefined) {
+          throw new Error('File must have columns Name, Date, Email.');
+        }
+
+        for (let i = 1; i < rows.length; ++i) {
+          const row = rows[i];
+          const name = row[map.name] && row[map.name].toString().trim();
+          const dateInput = row[map.date] && row[map.date].toString().trim();
+          const email = row[map.email] && row[map.email].toString().trim();
           if (!name || !dateInput || !email) { failCount++; continue; }
           const dateObj = new Date(dateInput);
           if (isNaN(dateObj)) { failCount++; continue; }
@@ -186,10 +208,31 @@ function BirthdayTable({
               .filter(Boolean);
           }
 
-          for (const entry of entries) {
-            const [name, dateInput, email] = entry
-              .split(',')
-              .map((s) => s && s.trim());
+          // --- header mapping logic (fix here) ---
+          const getColMap = (headerRow) => {
+            const map = {};
+            headerRow.forEach((col, idx) => {
+              if (typeof col === 'string') {
+                const key = col.trim().toLowerCase();
+                if (key === 'name') map.name = idx;
+                if (key === 'date') map.date = idx;
+                if (key === 'email') map.email = idx;
+              }
+            });
+            return map;
+          };
+          const map = getColMap(entries[0].split(','));
+          // ✅ header check – fixed
+          if (map.name === undefined || map.date === undefined || map.email === undefined) {
+            throw new Error('First row must be headers: Name, Date, Email.');
+          }
+
+          for (let i = 1; i < entries.length; ++i) {
+            const entry = entries[i];
+            const cols = entry.split(',');
+            const name = cols[map.name] && cols[map.name].trim();
+            const dateInput = cols[map.date] && cols[map.date].trim();
+            const email = cols[map.email] && cols[map.email].trim();
             if (!name || !dateInput || !email) { failCount++; continue; }
             const dateObj = new Date(dateInput);
             if (isNaN(dateObj.getTime())) { failCount++; continue; }
