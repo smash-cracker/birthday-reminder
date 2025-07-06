@@ -82,7 +82,6 @@
   max-width: 100%;
   margin: 0 auto;
   width: 100%;
-  box-sizing: border-box;
 }
 
 /* forms */
@@ -195,7 +194,7 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
-  max-width: 250px;
+    max-width: 350px;
   flex: 1; /* Allow search input to take available space */
 }
 

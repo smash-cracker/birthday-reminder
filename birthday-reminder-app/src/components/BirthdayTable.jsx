@@ -277,7 +277,29 @@ function BirthdayTable({
       >
         
         {/* LEFT – Bulk controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        
+
+        {/* RIGHT – Search, Add, Upload */}
+        
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            width: '100%',
+          }}
+        >
+            {!bulkMode && (
+            <button
+              className="add-btn"
+              style={{ background: '#ffc107' }}
+              onClick={handleBulkMode}
+              title="Bulk Delete"
+            >
+              Bulk Delete
+            </button>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* {!bulkMode && (
             <button
               className="add-btn"
@@ -312,27 +334,6 @@ function BirthdayTable({
             </>
           )}
         </div>
-
-        {/* RIGHT – Search, Add, Upload */}
-        
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginLeft: 'auto',
-          }}
-        >
-            {!bulkMode && (
-            <button
-              className="add-btn"
-              style={{ background: '#ffc107' }}
-              onClick={handleBulkMode}
-              title="Bulk Delete"
-            >
-              Bulk Delete
-            </button>
-          )}
         {/* CENTER ­– Heading (flex: 1 to stay centered) */}
         <h2 className='largeHeader' style={{ textAlign: 'center', margin: 0 }}>
           Upcoming Birthdays
