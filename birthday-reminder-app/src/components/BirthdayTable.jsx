@@ -95,8 +95,62 @@ function BirthdayTable({
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
 
+  // --- Grouping logic ---
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  function isThisWeek(dateStr) {
+    const d = new Date(dateStr);
+    d.setFullYear(today.getFullYear());
+    d.setHours(0, 0, 0, 0);
+    const diff = (d - today) / 86400000;
+    return diff >= 0 && diff < 7;
+  }
+  function isNextWeek(dateStr) {
+    const d = new Date(dateStr);
+    d.setFullYear(today.getFullYear());
+    d.setHours(0, 0, 0, 0);
+    const diff = (d - today) / 86400000;
+    return diff >= 7 && diff < 14;
+  }
+  function isThisMonth(dateStr) {
+    const d = new Date(dateStr);
+    d.setFullYear(today.getFullYear());
+    d.setHours(0, 0, 0, 0);
+    // Only show birthdays in this month that are after today (not in this/next week)
+    return (
+      d.getMonth() === today.getMonth() &&
+      d > today &&
+      !isThisWeek(dateStr) &&
+      !isNextWeek(dateStr)
+    );
+  }
+  function isNextMonth(dateStr) {
+    const d = new Date(dateStr);
+    d.setFullYear(today.getFullYear());
+    d.setHours(0, 0, 0, 0);
+    const thisMonth = today.getMonth();
+    let bMonth = d.getMonth();
+    // If birthday already passed, treat as next year
+    if (d < today) bMonth = (bMonth + 12) % 12;
+    const nextMonth = (thisMonth + 1) % 12;
+    return bMonth === nextMonth;
+  }
+
   const sortedBirthdays = [...birthdays].sort(
     (a, b) => daysUntilNextBirthday(a.date) - daysUntilNextBirthday(b.date)
+  );
+
+  const thisWeek = sortedBirthdays.filter(b => isThisWeek(b.date));
+  const nextWeek = sortedBirthdays.filter(b => isNextWeek(b.date));
+  const thisMonth = sortedBirthdays.filter(
+    b => isThisMonth(b.date)
+  );
+  const nextMonth = sortedBirthdays.filter(
+    b => isNextMonth(b.date) && !isThisWeek(b.date) && !isNextWeek(b.date)
+  );
+  const rest = sortedBirthdays.filter(
+    b => !isThisWeek(b.date) && !isNextWeek(b.date) && !isThisMonth(b.date) && !isNextMonth(b.date)
   );
 
   const requestDelete = (id, name) => setConfirm({ id, name });
@@ -476,58 +530,296 @@ function BirthdayTable({
             </tr>
           </thead>
           <tbody style={{ display: 'block', width: '100%', tableLayout: 'fixed' }}>
-            {sortedBirthdays.map((b) => (
-              <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
-                {bulkMode && (
-                  <td style={{ width: '4%', textAlign: 'center' }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(b.id)}
-                      onChange={() => handleSelectOne(b.id)}
-                      style={{ cursor: 'pointer' }}
-                    />
+            {/* --- This Week --- */}
+            {thisWeek.length > 0 && (
+              <>
+                <tr style={{ display: 'table', width: '100%', tableLayout: 'fixed', background: '#e6f7ff' }}>
+                  <td colSpan={bulkMode ? 5 : 4} style={{ fontWeight: 'bold', padding: '0.7rem 0.5rem' }}>
+                    🎂 This Week
                   </td>
-                )}
-                <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
-                <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
-                <td style={{ width: '30%' }}>{b.email}</td>
+                </tr>
+                {thisWeek.map((b) => (
+                  <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
+                    {bulkMode && (
+                      <td style={{ width: '4%', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(b.id)}
+                          onChange={() => handleSelectOne(b.id)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </td>
+                    )}
+                    <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
+                    <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
+                    <td style={{ width: '30%' }}>{b.email}</td>
+                    <td style={{ width: bulkMode ? '19%' : '20%' }}>
+                      {!bulkMode && (
+                        <>
+                          <button
+                            onClick={() => onEdit(b)}
+                            title="Edit"
+                            className='edit-btn'
+                            style={{
+                              cursor: 'pointer',
+                              marginRight: '0.5rem',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => requestDelete(b.id, b.name)}
+                            title="Delete"
+                            style={{
+                              cursor: 'pointer',
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </>
+            )}
+            {/* --- Next Week --- */}
+            {nextWeek.length > 0 && (
+              <>
+                <tr style={{ display: 'table', width: '100%', tableLayout: 'fixed', background: '#f0f5ff' }}>
+                  <td colSpan={bulkMode ? 5 : 4} style={{ fontWeight: 'bold', padding: '0.7rem 0.5rem' }}>
+                    🗓️ Next Week
+                  </td>
+                </tr>
+                {nextWeek.map((b) => (
+                  <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
+                    {bulkMode && (
+                      <td style={{ width: '4%', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(b.id)}
+                          onChange={() => handleSelectOne(b.id)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </td>
+                    )}
+                    <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
+                    <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
+                    <td style={{ width: '30%' }}>{b.email}</td>
+                    <td style={{ width: bulkMode ? '19%' : '20%' }}>
+                      {!bulkMode && (
+                        <>
+                          <button
+                            onClick={() => onEdit(b)}
+                            title="Edit"
+                            className='edit-btn'
+                            style={{
+                              cursor: 'pointer',
+                              marginRight: '0.5rem',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => requestDelete(b.id, b.name)}
+                            title="Delete"
+                            style={{
+                              cursor: 'pointer',
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </>
+            )}
+            {/* --- This Month --- */}
+            {thisMonth.length > 0 && (
+              <>
+                <tr style={{ display: 'table', width: '100%', tableLayout: 'fixed', background: '#fffbe6' }}>
+                  <td colSpan={bulkMode ? 5 : 4} style={{ fontWeight: 'bold', padding: '0.7rem 0.5rem' }}>
+                    📆 UpComing This Month
+                  </td>
+                </tr>
+                {thisMonth.map((b) => (
+                  <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
+                    {bulkMode && (
+                      <td style={{ width: '4%', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(b.id)}
+                          onChange={() => handleSelectOne(b.id)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </td>
+                    )}
+                    <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
+                    <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
+                    <td style={{ width: '30%' }}>{b.email}</td>
+                    <td style={{ width: bulkMode ? '19%' : '20%' }}>
+                      {!bulkMode && (
+                        <>
+                          <button
+                            onClick={() => onEdit(b)}
+                            title="Edit"
+                            className='edit-btn'
+                            style={{
+                              cursor: 'pointer',
+                              marginRight: '0.5rem',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => requestDelete(b.id, b.name)}
+                            title="Delete"
+                            style={{
+                              cursor: 'pointer',
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </>
+            )}
+            {/* --- Next Month --- */}
+            {nextMonth.length > 0 && (
+              <>
+                <tr style={{ display: 'table', width: '100%', tableLayout: 'fixed', background: '#fff1f0' }}>
+                  <td colSpan={bulkMode ? 5 : 4} style={{ fontWeight: 'bold', padding: '0.7rem 0.5rem' }}>
+                    📅 Next Month
+                  </td>
+                </tr>
+                {nextMonth.map((b) => (
+                  <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
+                    {bulkMode && (
+                      <td style={{ width: '4%', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(b.id)}
+                          onChange={() => handleSelectOne(b.id)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </td>
+                    )}
+                    <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
+                    <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
+                    <td style={{ width: '30%' }}>{b.email}</td>
+                    <td style={{ width: bulkMode ? '19%' : '20%' }}>
+                      {!bulkMode && (
+                        <>
+                          <button
+                            onClick={() => onEdit(b)}
+                            title="Edit"
+                            className='edit-btn'
+                            style={{
+                              cursor: 'pointer',
+                              marginRight: '0.5rem',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => requestDelete(b.id, b.name)}
+                            title="Delete"
+                            style={{
+                              cursor: 'pointer',
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </>
+            )}
+            {/* --- All Others --- */}
+            {rest.length > 0 && (
+              <>
+                <tr style={{ display: 'table', width: '100%', tableLayout: 'fixed', background: '#f6ffed' }}>
+                  <td colSpan={bulkMode ? 5 : 4} style={{ fontWeight: 'bold', padding: '0.7rem 0.5rem' }}>
+                    📋 All Birthdays
+                  </td>
+                </tr>
+                {rest.map((b) => (
+                  <tr key={b.id} style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
+                    {bulkMode && (
+                      <td style={{ width: '4%', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(b.id)}
+                          onChange={() => handleSelectOne(b.id)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </td>
+                    )}
+                    <td style={{ width: bulkMode ? '22%' : '25%' }}>{b.name}</td>
+                    <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
+                    <td style={{ width: '30%' }}>{b.email}</td>
                 {/* <td style={{ width: '15%' }}>
                   <span className={`status ${b.status === 'Sent' ? 'sent' : 'not-sent'}`}>
                     {b.status}
                   </span>
                 </td> */}
-                <td style={{ width: bulkMode ? '19%' : '20%' }}>
-                  {!bulkMode && (
-                    <>
-                      <button
-                        onClick={() => onEdit(b)}
-                        title="Edit"
-                        className='edit-btn'
-                        style={{
-                          cursor: 'pointer',
-                          marginRight: '0.5rem',
-                          fontSize: '1.1rem',
-                        }}
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => requestDelete(b.id, b.name)}
-                        title="Delete"
-                        style={{
-                          cursor: 'pointer',
-                          background: 'none',
-                          border: 'none',
-                          fontSize: '1.1rem',
-                        }}
-                      >
-                        🗑️
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
+                    <td style={{ width: bulkMode ? '19%' : '20%' }}>
+                      {!bulkMode && (
+                        <>
+                          <button
+                            onClick={() => onEdit(b)}
+                            title="Edit"
+                            className='edit-btn'
+                            style={{
+                              cursor: 'pointer',
+                              marginRight: '0.5rem',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => requestDelete(b.id, b.name)}
+                            title="Delete"
+                            style={{
+                              cursor: 'pointer',
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '1.1rem',
+                            }}
+                          >
+                            🗑️
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </>
+            )}
           </tbody>
         </table>
       </div>
