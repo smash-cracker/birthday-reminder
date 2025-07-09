@@ -209,31 +209,31 @@ function BirthdayTable({
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        // --- header mapping logic (fix here) ---
+        // --- header mapping logic (allow missing email) ---
         const getColMap = (headerRow) => {
           const map = {};
           headerRow.forEach((col, idx) => {
             if (typeof col === 'string') {
               const key = col.trim().toLowerCase();
               if (key === 'name') map.name = idx;
-              if (key === 'date') map.date = idx;
+              if (key === 'date' || key === 'dob') map.date = idx;
               if (key === 'email') map.email = idx;
             }
           });
           return map;
         };
         const map = getColMap(rows[0]);
-        // ✅ header check – fixed
-        if (map.name === undefined || map.date === undefined || map.email === undefined) {
-          throw new Error('File must have columns Name, Date, Email.');
+        // Allow files with just name and date/dob
+        if (map.name === undefined || map.date === undefined) {
+          throw new Error('File must have columns Name and Date (or DOB).');
         }
 
         for (let i = 1; i < rows.length; ++i) {
           const row = rows[i];
           const name = row[map.name] && row[map.name].toString().trim();
           const dateInput = row[map.date] && row[map.date].toString().trim();
-          const email = row[map.email] && row[map.email].toString().trim();
-          if (!name || !dateInput || !email) { failCount++; continue; }
+          const email = map.email !== undefined && row[map.email] ? row[map.email].toString().trim() : '';
+          if (!name || !dateInput) { failCount++; continue; }
           const dateObj = new Date(dateInput);
           if (isNaN(dateObj)) { failCount++; continue; }
           const tzOffset = dateObj.getTimezoneOffset() * 60000;
@@ -262,23 +262,23 @@ function BirthdayTable({
               .filter(Boolean);
           }
 
-          // --- header mapping logic (fix here) ---
+          // --- header mapping logic (allow missing email) ---
           const getColMap = (headerRow) => {
             const map = {};
             headerRow.forEach((col, idx) => {
               if (typeof col === 'string') {
                 const key = col.trim().toLowerCase();
                 if (key === 'name') map.name = idx;
-                if (key === 'date') map.date = idx;
+                if (key === 'date' || key === 'dob') map.date = idx;
                 if (key === 'email') map.email = idx;
               }
             });
             return map;
           };
           const map = getColMap(entries[0].split(','));
-          // ✅ header check – fixed
-          if (map.name === undefined || map.date === undefined || map.email === undefined) {
-            throw new Error('First row must be headers: Name, Date, Email.');
+          // Allow files with just name and date/dob
+          if (map.name === undefined || map.date === undefined) {
+            throw new Error('First row must be headers: Name and Date (or DOB).');
           }
 
           for (let i = 1; i < entries.length; ++i) {
@@ -286,8 +286,8 @@ function BirthdayTable({
             const cols = entry.split(',');
             const name = cols[map.name] && cols[map.name].trim();
             const dateInput = cols[map.date] && cols[map.date].trim();
-            const email = cols[map.email] && cols[map.email].trim();
-            if (!name || !dateInput || !email) { failCount++; continue; }
+            const email = map.email !== undefined && cols[map.email] ? cols[map.email].trim() : '';
+            if (!name || !dateInput) { failCount++; continue; }
             const dateObj = new Date(dateInput);
             if (isNaN(dateObj.getTime())) { failCount++; continue; }
             const tzOffset = dateObj.getTimezoneOffset() * 60000;
@@ -782,7 +782,7 @@ function BirthdayTable({
                     <td style={{ width: '25%' }}>{toDateDisplay(b.date)}</td>
                     <td style={{ width: '30%' }}>{b.email}</td>
                 {/* <td style={{ width: '15%' }}>
-                  <span className={`status ${b.status === 'Sent' ? 'sent' : 'not-sent'}`}>
+                  <span className={status ${b.status === 'Sent' ? 'sent' : 'not-sent'}}>
                     {b.status}
                   </span>
                 </td> */}
