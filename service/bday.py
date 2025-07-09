@@ -15,8 +15,8 @@ DB_CONFIG = {
     "password": "postgres"
 }
 
-EMAIL_ADDRESS = "asthetic0813@gmail.com"
-EMAIL_PASSWORD = "xfhf kvfu zwjy najd"
+EMAIL_ADDRESS = "birthdaycezentech@gmail.com"
+EMAIL_PASSWORD = "wgbx tkgq vjls feth"
 CARD_PATH = "/home/karthik/birthday-stack/service/birthday_card.jpg"
 
 # ───── 2. Email Sending ─────
@@ -128,8 +128,8 @@ def send_today_birthdays():
 
         # 2. Send HR summary
         names_str = ", ".join(name for name, _ in birthday_people)
-        send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str, True)
-        send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str, True)
+        send_birthday_email_to_HR("sayona@cezentech.com", "Sayona", names_str, True)
+        send_birthday_email_to_HR("shoba@cezentech.com", "Shobha", names_str, True)
 
         # 3. Notify team (exclude birthday person)
         for name, email in birthday_people:
@@ -157,8 +157,8 @@ def get_birthdays_tomorrow():
             return
 
         names_str = ", ".join(name for (name,) in results)
-        send_birthday_email_to_HR("karthikreddie08@gmail.com", "Sayona", names_str, False)
-        send_birthday_email_to_HR("karthikreddy0813@gmail.com", "Shobha", names_str, False)
+        send_birthday_email_to_HR("sayona@cezentech.com", "Sayona", names_str, False)
+        send_birthday_email_to_HR("shoba@cezentech.com", "Shobha", names_str, False)
 
     except Exception as e:
         print("⚠️ Error while checking tomorrow's birthdays:", e)
