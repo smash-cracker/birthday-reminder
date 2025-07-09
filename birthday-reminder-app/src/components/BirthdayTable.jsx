@@ -185,7 +185,7 @@ function BirthdayTable({
     if (!email) return;
 
     // Send to backend
-    await fetch('http://localhost:5000/api/birthdays', {
+    await fetch('http://172.20.100.110:5000/api/birthdays', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, date, email }),
@@ -238,7 +238,7 @@ function BirthdayTable({
           if (isNaN(dateObj)) { failCount++; continue; }
           const tzOffset = dateObj.getTimezoneOffset() * 60000;
           const date = new Date(dateObj - tzOffset).toISOString().slice(0, 10);
-          const resp = await fetch('http://localhost:5000/api/birthdays', {
+          const resp = await fetch('http://172.20.100.110:5000/api/birthdays', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, date, email }),
@@ -294,7 +294,7 @@ function BirthdayTable({
             const date = new Date(dateObj.getTime() - tzOffset)
               .toISOString()
               .slice(0, 10);
-            const resp = await fetch('http://localhost:5000/api/birthdays', {
+            const resp = await fetch('http://172.20.100.110:5000/api/birthdays', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ name, date, email }),

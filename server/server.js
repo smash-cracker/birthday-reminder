@@ -37,12 +37,6 @@ pool.on('connect', () => console.log('🗄️  PostgreSQL connected'));
 const app = express();
 
 app.use(cors({
-  origin: [
-    `http://${lanIP}:5173`,
-    `http://${lanIP}:3000`,
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type']
 }));
