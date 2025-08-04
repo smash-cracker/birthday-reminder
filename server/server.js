@@ -27,11 +27,30 @@ const lanIP = getHostIP();
 const pool = new Pool({
   host:     process.env.PGHOST     || 'localhost',
   user:     process.env.PGUSER     || 'postgres',
-  password: process.env.PGPASSWORD || 'postgres',
+  password: process.env.PGPASSWORD || 'cezen@123',
   database: process.env.PGDATABASE || 'birthdays',
   port:     process.env.PGPORT     || 5432,
 });
 pool.on('connect', () => console.log('🗄️  PostgreSQL connected'));
+
+async function ensureTableExists() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS birthdays (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      date DATE NOT NULL,
+      email VARCHAR(255),
+      status VARCHAR(20) DEFAULT 'Not Sent'
+    )
+    `);
+    console.log('✅ Table "birthdays" is ready');
+  } catch (err) {
+    console.error('❌ Error creating "birthdays" table:', err);
+  }
+}
+
+ensureTableExists();
 
 /* ---------- 2. App Setup ---------- */
 const app = express();
