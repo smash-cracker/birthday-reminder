@@ -12,7 +12,7 @@ export default function App() {
   const [editing, setEditing] = useState(null);
   const [search, setSearch] = useState('');
 
-  const hostIp = '172.20.100.110';
+  const hostIp = '192.168.1.38';
   // const hostIp = '172.16.11.154';
   // const hostIp = '192.168.1.34';
 
