@@ -40,8 +40,8 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.name || !form.date || !form.email) {
-      alert('Name, Date of Birth, and Email are required.');
+    if (!form.name || !form.date) {
+      alert('Name, Date of Birth are required.');
       return;
     }
     // Always send only the date part (YYYY-MM-DD)
@@ -76,7 +76,6 @@ function BirthdayForm({ onAdd, onEdit, editingBirthday, onClose }) {
         placeholder="Email"
         value={form.email}
         onChange={handleChange}
-        required
       />
       <div style={{ display: 'flex', gap: '0.5rem',justifyContent:'space-between' }}>
         <button type="submit">

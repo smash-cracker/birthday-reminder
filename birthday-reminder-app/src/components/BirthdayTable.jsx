@@ -74,6 +74,23 @@ function BulkDeleteModal({ count, onConfirm, onCancel }) {
   );
 }
 
+/* ---------- NEW: Download birthdays to Excel ---------- */
+function downloadBirthdaysToExcel(birthdays) {
+  if (!birthdays || !birthdays.length) {
+    alert('No data to download.');
+    return;
+  }
+  const sheetData = birthdays.map(b => ({
+    Name: b.name,
+    Date: toDateDisplay(b.date),
+    Email: b.email || '',
+  }));
+  const ws = XLSX.utils.json_to_sheet(sheetData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Birthdays");
+  XLSX.writeFile(wb, "birthdays.xlsx");
+}
+
 function BirthdayTable({
   birthdays,
   onDelete,
@@ -185,7 +202,7 @@ function BirthdayTable({
     if (!email) return;
 
     // Send to backend
-    await fetch('http://172.20.100.110:5000/api/birthdays', {
+    await fetch('http://localhost:5000/api/birthdays', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, date, email }),
@@ -238,7 +255,7 @@ function BirthdayTable({
           if (isNaN(dateObj)) { failCount++; continue; }
           const tzOffset = dateObj.getTimezoneOffset() * 60000;
           const date = new Date(dateObj - tzOffset).toISOString().slice(0, 10);
-          const resp = await fetch('http://172.20.100.110:5000/api/birthdays', {
+          const resp = await fetch('http://localhost:5000/api/birthdays', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, date, email }),
@@ -294,7 +311,7 @@ function BirthdayTable({
             const date = new Date(dateObj.getTime() - tzOffset)
               .toISOString()
               .slice(0, 10);
-            const resp = await fetch('http://172.20.100.110:5000/api/birthdays', {
+            const resp = await fetch('http://localhost:5000/api/birthdays', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ name, date, email }),
@@ -355,13 +372,18 @@ function BirthdayTable({
   };
   const cancelBulkDelete = () => setBulkConfirm(false);
 
+  // Download handler: export all records currently available
+  const handleDownload = () => {
+    downloadBirthdaysToExcel(sortedBirthdays);
+  };
+
   return (
     <div className="birthday-table">
       {/* ---------- TOP BAR (re‑ordered) ---------- */}
-        {/* CENTER ­– Heading (flex: 1 to stay centered) */}
-        <h2 className='smallHeader' style={{ flex: 1, textAlign: 'center', margin: 0 }}>
-          Upcoming Birthdays
-        </h2>
+      {/* CENTER ­– Heading (flex: 1 to stay centered) */}
+      <h2 className='smallHeader' style={{ flex: 1, textAlign: 'center', margin: 0 }}>
+        Upcoming Birthdays
+      </h2>
       <div
         className="top-bar"
         style={{
@@ -372,12 +394,9 @@ function BirthdayTable({
           flexWrap: 'wrap',
         }}
       >
-        
         {/* LEFT – Bulk controls */}
-        
 
         {/* RIGHT – Search, Add, Upload */}
-        
         <div
           style={{
             display: 'flex',
@@ -386,7 +405,7 @@ function BirthdayTable({
             width: '100%',
           }}
         >
-            {!bulkMode && (
+          {!bulkMode && (
             <button
               className="add-btn"
               style={{ background: '#ffc107' }}
@@ -397,76 +416,74 @@ function BirthdayTable({
             </button>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* {!bulkMode && (
-            <button
-              className="add-btn"
-              style={{ background: '#ffc107' }}
-              onClick={handleBulkMode}
-              title="Bulk Delete"
-            >
-              Bulk Delete
-            </button>
-          )} */}
-          
-          {bulkMode && (
-            <>
-              <button
-                className="add-btn"
-                style={{
-                  background: selectedIds.length ? '#dc3545' : '#aaa',
-                  cursor: selectedIds.length ? 'pointer' : 'not-allowed',
-                }}
-                onClick={handleBulkDelete}
-                disabled={!selectedIds.length}
-              >
-                Delete Selected
-              </button>
-              <button
-                className="add-btn"
-                style={{ background: '#6c757d' }}
-                onClick={handleBulkCancel}
-              >
-                Cancel
-              </button>
-            </>
-          )}
-        </div>
-        {/* CENTER ­– Heading (flex: 1 to stay centered) */}
-        <h2 className='largeHeader' style={{ textAlign: 'center', marginLeft:'auto' }}>
-          Upcoming Birthdays
-        </h2>
+            {bulkMode && (
+              <>
+                <button
+                  className="add-btn"
+                  style={{
+                    background: selectedIds.length ? '#dc3545' : '#aaa',
+                    cursor: selectedIds.length ? 'pointer' : 'not-allowed',
+                  }}
+                  onClick={handleBulkDelete}
+                  disabled={!selectedIds.length}
+                >
+                  Delete Selected
+                </button>
+                <button
+                  className="add-btn"
+                  style={{ background: '#6c757d' }}
+                  onClick={handleBulkCancel}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
+          {/* CENTER ­– Heading (flex: 1 to stay centered) */}
+          <h2 className='largeHeader' style={{ textAlign: 'center', marginLeft:'auto' }}>
+            Upcoming Birthdays
+          </h2>
 
 
           <div className="right-side">
             <input
-            className="search-input"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {!showForm && !bulkMode && (
+              className="search-input"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {/* --------- The new Download button --------- */}
             <button
               className="add-btn"
-              onClick={() => {
-                setEditing(null);
-                setShowForm(true);
-              }}
+              style={{ background: "#28a745", color: "#fff" }}
+              onClick={handleDownload}
             >
-              Add
+              Download
             </button>
-          )}
-          <label
-            className="add-btn"
-            style={{ background: '#17a2b8', cursor: 'pointer' }}
-          >
-            Upload
-            <input
-              type="file"
-              accept=".csv,.txt,.svg,.xlsx,.xls"
-              style={{ display: 'none' }}
-              onChange={handleFileInsert}
-            />
-          </label>
+            {/* Add, Upload Buttons unchanged */}
+            {!showForm && !bulkMode && (
+              <button
+                className="add-btn"
+                onClick={() => {
+                  setEditing(null);
+                  setShowForm(true);
+                }}
+              >
+                Add
+              </button>
+            )}
+            <label
+              className="add-btn"
+              style={{ background: '#17a2b8', cursor: 'pointer' }}
+            >
+              Upload
+              <input
+                type="file"
+                accept=".csv,.txt,.svg,.xlsx,.xls"
+                style={{ display: 'none' }}
+                onChange={handleFileInsert}
+              />
+            </label>
           </div>
         </div>
       </div>

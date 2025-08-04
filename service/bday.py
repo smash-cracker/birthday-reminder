@@ -129,12 +129,12 @@ def send_today_birthdays():
         # 2. Send HR summary
         names_str = ", ".join(name for name, _ in birthday_people)
         send_birthday_email_to_HR("sayona@cezentech.com", "Sayona", names_str, True)
-        send_birthday_email_to_HR("shoba@cezentech.com", "Shobha", names_str, True)
+        send_birthday_email_to_HR("shobha@cezentech.com", "Shobha", names_str, True)
 
         # 3. Notify team (exclude birthday person)
-        for name, email in birthday_people:
-            others = [e for e in all_emails if e != email]
-            send_birthday_announcement(others, name)
+       # for name, email in birthday_people:
+           # others = [e for e in all_emails if e != email]
+           # send_birthday_announcement(others, name)
 
     except Exception as e:
         print("⚠️ Error while checking today's birthdays:", e)
@@ -158,11 +158,10 @@ def get_birthdays_tomorrow():
 
         names_str = ", ".join(name for (name,) in results)
         send_birthday_email_to_HR("sayona@cezentech.com", "Sayona", names_str, False)
-        send_birthday_email_to_HR("shoba@cezentech.com", "Shobha", names_str, False)
+        send_birthday_email_to_HR("shobha@cezentech.com", "Shobha", names_str, False)
 
     except Exception as e:
         print("⚠️ Error while checking tomorrow's birthdays:", e)
-
 # ───── 5. Run ─────
 if __name__ == "__main__":
     send_today_birthdays()
